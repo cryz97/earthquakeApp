@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import "package:intl/intl.dart";
 
 Map _data;
 List _features;
@@ -39,8 +40,14 @@ class Quakes extends StatelessWidget {
               final index = position ~/ 2;
 
 
+              var date = new DateTime.fromMicrosecondsSinceEpoch(_features[index]["properties"]["time"]*1000
+              , isUtc: true);
+
+              var format = DateFormat("yMd").add_jm();
+              var dateString = format.format(date);
+
               return new ListTile(
-                title: new Text("Mag: ${_features[index]["properties"]["mag"]}",
+                title: new Text("At: $dateString,",
                 style: new TextStyle(
                     fontSize: 19,
                     color: Colors.blueAccent,
@@ -62,6 +69,7 @@ class Quakes extends StatelessWidget {
                       fontStyle: FontStyle.italic
                     ),),
                 ),
+                onTap: () { _showAlertMessage(context, "${_features[index]['properties']['title']}");},
               );
 
       }),
@@ -69,6 +77,18 @@ class Quakes extends StatelessWidget {
     );
   }
 
+}
+
+void _showAlertMessage(BuildContext context, String message) {
+  var alert = new AlertDialog(
+    title: new Text("Quakes"),
+    content: new Text(message),
+    actions: <Widget>[
+      new FlatButton(onPressed: (){Navigator.pop(context);},
+          child: new Text("Ok"))
+    ],
+  );
+  showDialog(context: context, builder:(context)=> alert) ;
 }
 
 Future<Map> getQuakes() async {
